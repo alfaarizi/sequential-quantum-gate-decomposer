@@ -36,6 +36,7 @@ class qgd_N_Qubit_State_Preparation_adaptive(qgd_N_Qubit_Decomposition_adaptive)
 	def __init__( self, State, level_limit_max=8, level_limit_min=0, topology=None, config={} ):
 		if ( (type(State) == np.ndarray) and (State.shape[1]==1) ):
 			super().__init__( State, level_limit_max, level_limit_min, topology=topology, config=config )
+			self.config = config
 		else:
 			raise Exception("Initial state not properly formatted. Input state must be a column vector")
 			
@@ -96,4 +97,22 @@ class qgd_N_Qubit_State_Preparation_adaptive(qgd_N_Qubit_Decomposition_adaptive)
 				circuit.sx(gate.get("target_qbit"))
 
 		return circuit
+	def Start_Decomposition(self):
+		if "Optimizer" in self.config:
+			super(qgd_N_Qubit_State_Preparation_adaptive, self).set_Optimizer(self.config["Optimizer"])
+		if "Cost_function" in self.config:
+			super(qgd_N_Qubit_State_Preparation_adaptive, self).set_Cost_Function_Variant(self.config["Cost_function"])
+		if ("compression_enabled" not in self.config ) and ("optims" not in self.config):
+			super(qgd_N_Qubit_State_Preparation_adaptive, self).Start_Decomposition()
+		else:
+			if "optims" in self.config:
+				for optim in self.config["optims"]:
+					super(qgd_N_Qubit_State_Preparation_adaptive, self).set_Optimizer(optim)
+					super(qgd_N_Qubit_State_Preparation_adaptive, self).get_Initial_Circuit()
+			else:
+				super(qgd_N_Qubit_State_Preparation_adaptive, self).get_Initial_Circuit()
+			if self.config["compression_enabled"]==1:
+				super(qgd_N_Qubit_State_Preparation_adaptive, self).Compress_Circuit()
+			super(qgd_N_Qubit_State_Preparation_adaptive, self).Finalize_Circuit()
+			
 

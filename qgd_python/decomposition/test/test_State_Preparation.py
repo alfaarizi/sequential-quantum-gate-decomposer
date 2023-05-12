@@ -64,7 +64,7 @@ class Test_State_Preparation:
             cDecompose = qgd_N_qubit_State_Preparation_adaptive(Umtx,
                     level_limit_max=5, level_limit_min=0)
 
-    def State_Preparation_adaptive_base(self, optimizer, cost_func, compression_enabled=1):
+    def State_Preparation_adaptive_base(self, config):
 
         from qgd_python.decomposition.qgd_N_Qubit_State_Preparation_adaptive import qgd_N_Qubit_State_Preparation_adaptive
         from scipy.io import loadmat
@@ -78,19 +78,6 @@ class Test_State_Preparation:
         Umtx = data['Umtx']
         State = Umtx[:, 0].reshape(16, 1)
 
-        config = { 'max_outer_iterations': 1, 
-		'max_inner_iterations': 1000000, 
-		'max_inner_iterations_compression': 10000, 
-		'max_inner_iterations_final': 1000, 
-		'randomization_threshold': int(1e4),  			
-		'Randomized_Radius': 0.3, 
-	    'randomized_adaptive_layers': 1,
-		'optimization_tolerance_agent': 1e-4,
-		'optimization_tolerance': 1e-4,
-		'compression_enabled': compression_enabled,
-		'number_of_agents': 4}
-
-
         # creating a class to decompose the unitary
 
         cDecompose = qgd_N_Qubit_State_Preparation_adaptive(State,
@@ -99,14 +86,6 @@ class Test_State_Preparation:
         # setting the verbosity of the decomposition
 
         cDecompose.set_Verbose(3)
-
-        # setting the verbosity of the decomposition
-
-        cDecompose.set_Cost_Function_Variant(cost_func)
-        
-        #set Optimizer
-        
-        cDecompose.set_Optimizer(optimizer)
         
         # starting the decomposition
 
@@ -136,8 +115,18 @@ class Test_State_Preparation:
         Test for a 4 qubit state preparation using the BFGS optimizer 
 
         """
-
-        self.State_Preparation_adaptive_base('BFGS', 0)	
+        config = { 'max_outer_iterations': 1, 
+		'max_inner_iterations': 1000000, 
+		'max_inner_iterations_compression': 10000, 
+		'max_inner_iterations_final': 1000, 
+		'randomization_threshold': int(1e4),  			
+		'Randomized_Radius': 0.3, 
+	    'randomized_adaptive_layers': 1,
+		'optimization_tolerance_agent': 1e-4,
+		'optimization_tolerance': 1e-4,
+		'Optimizer':"BFGS",
+		'number_of_agents': 4}
+        self.State_Preparation_adaptive_base(config)	
 
     def test_State_Preparation_HS(self):
         r"""
@@ -145,5 +134,56 @@ class Test_State_Preparation:
         Test for a 4 qubit state preparation using the Hilbert Schmidt test
 
         """
+        config = { 'max_outer_iterations': 1, 
+		'max_inner_iterations': 1000000, 
+		'max_inner_iterations_compression': 10000, 
+		'max_inner_iterations_final': 1000, 
+		'randomization_threshold': int(1e4),  			
+		'Randomized_Radius': 0.3, 
+	    'randomized_adaptive_layers': 1,
+		'optimization_tolerance_agent': 1e-4,
+		'optimization_tolerance': 1e-4,
+		'Optimizer':"BFGS",
+		'number_of_agents': 4,
+		'Cost_function':3}
+        self.State_Preparation_adaptive_base(config)
+    def test_State_Preparation_no_compression(self):
+        r"""
+        This method is called by pytest. 
+        Test for a 4 qubit state preparation using the Hilbert Schmidt test
 
-        self.State_Preparation_adaptive_base('BFGS', 3)
+        """
+        config = { 'max_outer_iterations': 1, 
+		'max_inner_iterations': 1000000, 
+		'max_inner_iterations_compression': 10000, 
+		'max_inner_iterations_final': 1000, 
+		'randomization_threshold': int(1e4),  			
+		'Randomized_Radius': 0.3, 
+	    'randomized_adaptive_layers': 1,
+		'optimization_tolerance_agent': 1e-4,
+		'optimization_tolerance': 1e-4,
+		'Optimizer':"BFGS",
+		'number_of_agents': 4,
+		'Cost_function':0,
+		'compression_enabled':0}
+        self.State_Preparation_adaptive_base(config)
+    def test_State_Preparation_multiple_optims(self):
+        r"""
+        This method is called by pytest. 
+        Test for a 4 qubit state preparation using the Hilbert Schmidt test
+
+        """
+        config = { 'max_outer_iterations': 1, 
+		'max_inner_iterations': 1000000, 
+		'max_inner_iterations_compression': 10000, 
+		'max_inner_iterations_final': 1000, 
+		'randomization_threshold': int(1e4),  			
+		'Randomized_Radius': 0.3, 
+	    'randomized_adaptive_layers': 1,
+		'optimization_tolerance_agent': 1e-4,
+		'optimization_tolerance': 1e-4,
+		'optims':["AGENTS","BFGS"],
+		'number_of_agents': 4,
+		'Cost_function':0,
+		'compression_enabled':1}
+        self.State_Preparation_adaptive_base(config)
