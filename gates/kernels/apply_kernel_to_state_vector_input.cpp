@@ -507,7 +507,7 @@ void
 apply_kernel_to_state_vector_input_parallel_AVX(Matrix& u3_1qbit, Matrix& input, const bool& deriv, const int& target_qbit, const int& control_qbit, const int& matrix_size) {
 
 
-    int grain_size = 64;
+    int grain_size = 4096;
 
     unsigned int bitmask_low = (1 << target_qbit) - 1;
     unsigned int bitmask_high = ~bitmask_low;

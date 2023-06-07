@@ -41,7 +41,7 @@ static double adam_time = 0;
 static double bfgs_time = 0;
 static double pure_DFE_time = 0;
 
-static double DFE_time = 0.0;
+static double optimization_problem_batched_time = 0.0;
 static double CPU_time = 0.0;
 
 
@@ -864,7 +864,6 @@ void N_Qubit_Decomposition_Base::solve_layer_optimization_problem_AGENTS( int nu
 
         tbb::tick_count optimization_start = tbb::tick_count::now();
         double optimization_time = 0.0;
-pure_DFE_time = 0.0;
 
 
 
@@ -1162,6 +1161,10 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
                     current_minimum_agents[agent_idx] = offset - amplitude;
                     
                 }
+
+                // CPU time             
+                CPU_time += (tbb::tick_count::now() - t0_CPU).seconds();        
+            
                 
             }  
             else if ( cost_fnc == HILBERT_SCHMIDT_TEST){
@@ -1292,23 +1295,27 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
                     BFGS_Powell cBFGS_Powell(HS_partial_optimization_problem_combined, this);
                     double f = cBFGS_Powell.Start_Optimization(parameter_shift, 10);
 		
-                    //update  the parameter vector
-                    Matrix_real& solution_guess_mtx_agent                   = solution_guess_mtx_agents[ agent_idx ];                             
-                    solution_guess_mtx_agent[param_idx_agents[ agent_idx ]] = parameter_value_save_agents[ agent_idx ] + parameter_shift[0]; 
+                    if ( f < current_minimum_agents[agent_idx] ) {
+                        //update  the parameter vector
+                        Matrix_real& solution_guess_mtx_agent                   = solution_guess_mtx_agents[ agent_idx ];                             
+                        solution_guess_mtx_agent[param_idx_agents[ agent_idx ]] = parameter_value_save_agents[ agent_idx ] + parameter_shift[0]; 
 
-                    current_minimum_agents[agent_idx] = f;
+                        current_minimum_agents[agent_idx] = f;
+
+                    }
+                    else {
+                        Matrix_real& solution_guess_mtx_agent                   = solution_guess_mtx_agents[ agent_idx ];           
+                        solution_guess_mtx_agent[param_idx_agents[ agent_idx ]] = parameter_value_save_agents[ agent_idx ];
+                    }
                     
-                }                                                                                                                         
+                }   
+
+                // CPU time             
+                CPU_time += (tbb::tick_count::now() - t0_CPU).seconds();        
+                                                                                                                                  
                 
             }
-    
-
                 
-            
-               
-            // CPU time                                                     
-            CPU_time += (tbb::tick_count::now() - t0_CPU).seconds();
-            
   
             // CPU time                                        
             t0_CPU = tbb::tick_count::now();        
@@ -1362,7 +1369,7 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
 
             }
 */
-
+std::cout << iter_idx << " " << most_successfull_agent << " " <<  current_minimum_agents[ most_successfull_agent ] << std::endl;
             // ocassionaly recalculate teh current cost functions of the agents
             if ( iter_idx % agent_lifetime_loc == 0 )
             {
@@ -1371,14 +1378,19 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
             }
 
 
+            double current_minimum_loc = DBL_MAX;
             
             // govern the behavior of the agents
             for ( int agent_idx=0; agent_idx<agent_num; agent_idx++ ) {
                 double& current_minimum_agent = current_minimum_agents[ agent_idx ];
-                   
+                 
+                if ( current_minimum_agent <= current_minimum_loc ) {
+                    most_successfull_agent = agent_idx;
+                    current_minimum_loc = current_minimum_agent;     
+                }
            
                 
-                if (current_minimum_agents[agent_idx] < optimization_tolerance_loc ) {
+                if (current_minimum_agent < optimization_tolerance_loc ) {
                     terminate_optimization = true;                    
                 }  
                 
@@ -1394,7 +1406,7 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
                             
                     if ( current_minimum_agent <= current_minimum ) {
 
-                        most_successfull_agent = agent_idx;
+
                     
                         // export the parameters of the curremt, most successful agent
                         memcpy(optimized_parameters_mtx.get_data(), solution_guess_mtx_agent.get_data(), num_of_parameters*sizeof(double) );
@@ -1408,7 +1420,7 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
                         }
 
                         
-                        current_minimum = current_minimum_agent;      
+                        current_minimum = current_minimum_agent;     
                         
                                    
                         
@@ -1487,7 +1499,7 @@ tbb::tick_count t0_CPU = tbb::tick_count::now();
                     std::stringstream sstream;
                     sstream << "AGENTS, agent " << agent_idx << ": processed iterations " << (double)iter_idx/max_inner_iterations_loc*100 << "\%";
                     sstream << ", current minimum of agent 0: " << current_minimum_agents[ 0 ] << " global current minimum: " << current_minimum  << " CPU time: " << CPU_time;
-                    sstream << " DFE_time: " << DFE_time << " pure DFE time: " << pure_DFE_time << std::endl;
+                    sstream << " optimization_problem_batched_time: " << optimization_problem_batched_time << std::endl;
                     print(sstream, 0); 
                 }
 
@@ -1513,7 +1525,7 @@ CPU_time += (tbb::tick_count::now() - t0_CPU).seconds();
         tbb::tick_count optimization_end = tbb::tick_count::now();
         optimization_time  = optimization_time + (optimization_end-optimization_start).seconds();
         sstream.str("");
-        sstream << "AGENTS time: " << adam_time << ", pure DFE time:  " << pure_DFE_time << " " << current_minimum << std::endl;
+        sstream << "AGENTS time: " << adam_time << ", optimization_problem_batched_time: " << optimization_problem_batched_time << " " << current_minimum << std::endl;
 
         print(sstream, 0); 
 }
@@ -2042,7 +2054,8 @@ pure_DFE_time = 0.0;
                 
                 randomization_successful = 1;
             }
-    
+
+std::cout << iter_idx << " " << current_minimum  << " " << f0 << std::endl;
 
             if ( iter_idx % 5000 == 0 ) {
 
@@ -2490,7 +2503,6 @@ double N_Qubit_Decomposition_Base::optimization_problem( Matrix_real& parameters
         exit(-1);
     }
 
-
     Matrix matrix_new = get_transformed_matrix( parameters, gates.begin(), gates.size(), Umtx );
 //matrix_new.print_matrix();
 
@@ -2537,7 +2549,7 @@ double N_Qubit_Decomposition_Base::optimization_problem( Matrix_real& parameters
 Matrix_real 
 N_Qubit_Decomposition_Base::optimization_problem_batched( std::vector<Matrix_real>& parameters_vec) {
 
-tbb::tick_count t0_DFE = tbb::tick_count::now();        
+tbb::tick_count t0_optimization_problem_batched = tbb::tick_count::now();        
 
 
         Matrix_real cost_fnc_mtx(parameters_vec.size(), 1);
@@ -2605,6 +2617,7 @@ pure_DFE_time += (tbb::tick_count::now() - t0_DFE_pure).seconds();
 
 #endif
 
+
         tbb::parallel_for( 0, (int)parameters_vec.size(), 1, [&]( int idx) {
             cost_fnc_mtx[idx] = optimization_problem( parameters_vec[idx] );
         });
@@ -2617,7 +2630,7 @@ pure_DFE_time += (tbb::tick_count::now() - t0_DFE_pure).seconds();
     }
 #endif
 
-DFE_time += (tbb::tick_count::now() - t0_DFE).seconds();       
+optimization_problem_batched_time += (tbb::tick_count::now() - t0_optimization_problem_batched).seconds();       
     return cost_fnc_mtx;
         
 }
