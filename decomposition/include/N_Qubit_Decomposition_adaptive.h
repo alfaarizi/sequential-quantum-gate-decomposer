@@ -128,12 +128,12 @@ virtual void start_decomposition(bool prepare_export=true);
 /**
 @brief get initial circuit
 */
-virtual void get_initial_circuit(bool prepare_export=true);
+virtual void get_initial_circuit();
 
 /**
 @brief Compress the circuit
 */
-virtual void compress_circuit(bool prepare_export=true);
+virtual void compress_circuit();
 
 /**
 @brief Finalize the circuit

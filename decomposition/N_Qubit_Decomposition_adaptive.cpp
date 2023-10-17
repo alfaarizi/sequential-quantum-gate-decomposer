@@ -214,9 +214,7 @@ N_Qubit_Decomposition_adaptive::start_decomposition(bool prepare_export) {
 /**
 @brief ???????????????????
 */
-void N_Qubit_Decomposition_adaptive::get_initial_circuit(bool prepare_export) {
-
-
+void N_Qubit_Decomposition_adaptive::get_initial_circuit() {
 // temporarily turn off OpenMP parallelism
 #if BLAS==0 // undefined BLAS
     num_threads = omp_get_max_threads();
@@ -283,13 +281,8 @@ void N_Qubit_Decomposition_adaptive::get_initial_circuit(bool prepare_export) {
     
     // store the created gate structure
     release_gates();
-    combine( gate_structure_loc );
-    delete( gate_structure_loc );
-
-    // prepare gates to export
-    if (prepare_export) {
-        prepare_gates_to_export();
-    }
+	combine( gate_structure_loc );
+	delete( gate_structure_loc );
 	
 	
 #if BLAS==0 // undefined BLAS
