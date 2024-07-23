@@ -327,6 +327,10 @@ void Sub_Matrix_Decomposition::add_gate_layers() {
                 Adaptive* ad_gate = static_cast<Adaptive*>( gate );
                 add_gate_to_end( (Gate*)ad_gate->clone() );
             }
+            else if (gate->get_type() == CZ_NU_OPERATION ) {
+                std::string err("Sub_Matrix_Decomposition::add_gate_layers: CZ_NU gate not supported in this implementation");
+                throw err;
+            }
             else if (gate->get_type() == BLOCK_OPERATION ) {
                 Gates_block* block_gate = static_cast<Gates_block*>( gate );
                 add_gate_to_end( (Gate*)block_gate->clone() );

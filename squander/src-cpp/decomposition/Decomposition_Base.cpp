@@ -866,6 +866,10 @@ Decomposition_Base::get_transformed_matrix( Matrix_real &parameters, std::vector
             Z* z_gate = static_cast<Z*>( gate );
             z_gate->apply_to( ret_matrix );            
         }
+        else if (gate->get_type() == CZ_NU_OPERATION ) {
+            CZ_NU* cz_nu_gate = static_cast<CZ_NU*>( gate );
+            cz_nu_gate->apply_to( parameters_mtx, ret_matrix);            
+        }        
         else if (gate->get_type() == SX_OPERATION ) {
             SX* sx_gate = static_cast<SX*>( gate );
             sx_gate->apply_to( ret_matrix );            
@@ -873,7 +877,7 @@ Decomposition_Base::get_transformed_matrix( Matrix_real &parameters, std::vector
         else if (gate->get_type() == UN_OPERATION ) {
             UN* un_gate = static_cast<UN*>( gate );
             un_gate->apply_to( parameters_mtx, ret_matrix);            
-        }
+        }        
         else if (gate->get_type() == ON_OPERATION ) {
             ON* on_gate = static_cast<ON*>( gate );
             on_gate->apply_to( parameters_mtx, ret_matrix);            
@@ -1007,6 +1011,10 @@ Decomposition_Base::get_gate_products(double* parameters, std::vector<Gate*>::it
             SX* sx_gate = static_cast<SX*>(gate);
             sx_gate->apply_from_right(mtx);
         }
+        else if (gate->get_type() == CZ_NU_OPERATION ) {
+            CZ_NU* cz_nu_gate = static_cast<CZ_NU*>(gate);
+            cz_nu_gate->apply_from_right(parameters_loc_mtx, mtx);
+        }        
         else if (gate->get_type() == UN_OPERATION ) {
             UN* un_gate = static_cast<UN*>(gate);
             un_gate->apply_from_right(parameters_loc_mtx, mtx);
@@ -1417,6 +1425,13 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
 
 
         }
+        else if (gate->get_type() == CZ_NU_OPERATION) {
+
+            std::string err("Decomposition_Base::prepare_gates_to_export: not possible to export CZ_NU gate");
+            throw err;
+
+
+        }        
         else if (gate->get_type() == UN_OPERATION) {
 
              // get the inverse parameters of the RZ rotation

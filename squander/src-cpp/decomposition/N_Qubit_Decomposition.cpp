@@ -201,7 +201,8 @@ N_Qubit_Decomposition::start_decomposition(bool finalize_decomp, bool prepare_ex
         if ( gates_num.x>0 ) sstream << gates_num.x << " X gates," << std::endl;
         if ( gates_num.sx>0 ) sstream << gates_num.sx << " SX gates," << std::endl; 
         if ( gates_num.syc>0 ) sstream << gates_num.syc << " Sycamore gates," << std::endl;
-        if ( gates_num.adap>0 )sstream << gates_num.adap << " Adaptive gates," << std::endl;   	
+        if ( gates_num.adap>0 )sstream << gates_num.adap << " Adaptive gates," << std::endl;
+        if ( gates_num.cz_nu>0 )sstream << gates_num.cz_nu << " CZ_NU gates," << std::endl;   	
 
 
         sstream << std::endl;
@@ -486,6 +487,10 @@ N_Qubit_Decomposition::extract_subdecomposition_results( Sub_Matrix_Decompositio
                 Gate* op_cloned = static_cast<Gate*>( ad_op_cloned );
                 add_gate( op_cloned );
             }
+            else if (op->get_type() == CZ_NU_OPERATION) {
+                std::string err("N_Qubit_Decomposition::extract_subdecomposition_results: CZ_NU gate not supported in this implementation");
+                throw err;
+            }            
             else if (op->get_type() == BLOCK_OPERATION) {
                 Gates_block* block_op = static_cast<Gates_block*>( op );
                 Gates_block* block_op_cloned = block_op->clone();
