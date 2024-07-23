@@ -131,7 +131,6 @@ std::cout << "ooooooooooooo " <<  optimized_parameters_mtx.size() << std::endl;
     // final tuning of the decomposition parameters
     final_optimization();
 
-
     // prepare gates to export
     if (prepare_export) {
         prepare_gates_to_export();

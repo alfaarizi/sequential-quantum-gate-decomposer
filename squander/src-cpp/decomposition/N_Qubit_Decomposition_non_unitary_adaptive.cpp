@@ -190,9 +190,10 @@ N_Qubit_Decomposition_non_unitary_adaptive::start_decomposition(bool prepare_exp
     print(sstream, 1);   
 
 
-
     // get the initial circuit including redundand 2-qbit blocks.
     get_initial_circuit();
+    
+
      
     // finalyzing the gate structure by turning CRY gates inti CNOT gates and do optimization cycles to correct approximation in this transformation 
     // (CRY gates with small rotation angles are expressed with a single CNOT gate
@@ -581,7 +582,7 @@ N_Qubit_Decomposition_non_unitary_adaptive::optimize_imported_gate_structure(Mat
 }
 
 /**
-@brief Call determine the gate structrue of the decomposing circuit. (quantum circuit with CRY gates)
+@brief Call determine the gate structure of the decomposing circuit. (quantum circuit with CRY gates)
 @param optimized_parameters_mtx_loc A matrix containing the initial parameters
 */
 Gates_block* 
@@ -599,12 +600,11 @@ N_Qubit_Decomposition_non_unitary_adaptive::determine_initial_gate_structure(Mat
     else {
         optimization_tolerance_loc = optimization_tolerance;
     }         
-        
-    
+           
 
 
     int level = level_limit_min;
-    while ( current_minimum > optimization_tolerance_loc && level <= level_limit) {
+    while ( current_minimum > optimization_tolerance_loc && level <= 2 ) {//level_limit) {
 
         // create gate structure to be optimized
         Gates_block* gate_structure_loc = new Gates_block(qbit_num);  
@@ -613,16 +613,15 @@ N_Qubit_Decomposition_non_unitary_adaptive::determine_initial_gate_structure(Mat
                    
         for (int idx=0; idx<level; idx++) {
 
-            // create the new decomposing layer and add to the gate staructure
+            // create the new decomposing layer and add to the gate structure
             add_adaptive_layers( gate_structure_loc );
 
         }
            
-        // add finalyzing layer to the top of the gate structure
+        // add finalizing layer to the top of the gate structure
         add_finalyzing_layer( gate_structure_loc );
-            
 
-        //measure the time for the decompositin
+        //measure the time for the decomposition
         tbb::tick_count start_time_loc = tbb::tick_count::now();
 
 
@@ -668,10 +667,10 @@ N_Qubit_Decomposition_non_unitary_adaptive::determine_initial_gate_structure(Mat
                 
             
                 cDecomp_custom_random.start_decomposition(true);
-                
+        
 
                 
-                number_of_iters += cDecomp_custom_random.get_num_iters(); // retrive the number of iterations spent on optimization
+                number_of_iters += cDecomp_custom_random.get_num_iters(); // retrieve the number of iterations spent on optimization
 
 
          tbb::tick_count end_time_loc = tbb::tick_count::now();
@@ -704,7 +703,6 @@ N_Qubit_Decomposition_non_unitary_adaptive::determine_initial_gate_structure(Mat
         level++;
     }
 
-//exit(-1);
 
     // find the best decomposition
     int idx_min = 0;
@@ -949,7 +947,7 @@ Gates_block*
 N_Qubit_Decomposition_non_unitary_adaptive::construct_adaptive_gate_layers() {
 
 
-    //The stringstream input to store the output messages.
+    //The string stream input to store the output messages.
     std::stringstream sstream;
 
     // creating block of gates
@@ -986,7 +984,7 @@ N_Qubit_Decomposition_non_unitary_adaptive::construct_adaptive_gate_layers() {
             bool Lambda = true;
             layer->add_u3(target_qbit_loc, Theta, Phi, Lambda);
             layer->add_u3(control_qbit_loc, Theta, Phi, Lambda); 
-            layer->add_adaptive(target_qbit_loc, control_qbit_loc);
+            layer->add_cz_nu(target_qbit_loc, control_qbit_loc);
 
             layers.push_back(layer);
 
@@ -1006,7 +1004,7 @@ N_Qubit_Decomposition_non_unitary_adaptive::construct_adaptive_gate_layers() {
                 bool Lambda = true;
                 layer->add_u3(target_qbit_loc, Theta, Phi, Lambda);
                 layer->add_u3(control_qbit_loc, Theta, Phi, Lambda); 
-                layer->add_adaptive(target_qbit_loc, control_qbit_loc);
+                layer->add_cz_nu(target_qbit_loc, control_qbit_loc);
 
                 layers.push_back(layer);
             }

@@ -1278,8 +1278,6 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
             double varphi;
             double varlambda;
 
-            // get the inverse parameters of the U3 rotation
-
             U3* u3_gate = static_cast<U3*>(gate);
 
             if ((u3_gate->get_parameter_num() == 1) && u3_gate->is_theta_parameter()) {
@@ -1337,10 +1335,9 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == RX_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double vartheta;
 
-            // get the inverse parameters of the RX rotation
 
             RX* rx_gate = static_cast<RX*>(gate);
 
@@ -1355,10 +1352,9 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == RY_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double vartheta;
 
-            // get the inverse parameters of the RY rotation
 
             RY* ry_gate = static_cast<RY*>(gate);
 
@@ -1373,10 +1369,9 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == CRY_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double Theta;
 
-            // get the inverse parameters of the RZ rotation
 
             CRY* cry_gate = static_cast<CRY*>(gate);
 
@@ -1391,10 +1386,8 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == RZ_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double varphi;
-
-            // get the inverse parameters of the RZ rotation
 
             RZ* rz_gate = static_cast<RZ*>(gate);
 
@@ -1409,10 +1402,9 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == RZ_P_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double varphi;
 
-            // get the inverse parameters of the RZ rotation
 
             RZ_P* rz_gate = static_cast<RZ_P*>(gate);
 
@@ -1427,14 +1419,23 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == CZ_NU_OPERATION) {
 
-            std::string err("Decomposition_Base::prepare_gates_to_export: not possible to export CZ_NU gate");
-            throw err;
+            // define the parameter of the rotational angle
+            double Theta;
+
+
+            CZ_NU* cz_nu_gate = static_cast<CZ_NU*>(gate);
+
+            Theta = std::fmod( parameters[parameter_idx], 2*M_PI);
+            parameter_idx = parameter_idx + 1;
+
+
+            cz_nu_gate->set_optimized_parameters( Theta );
+            ops_ret.push_back( static_cast<Gate*>(cz_nu_gate) );
 
 
         }        
         else if (gate->get_type() == UN_OPERATION) {
 
-             // get the inverse parameters of the RZ rotation
             UN* un_gate = static_cast<UN*>(gate);
 
             Matrix_real optimized_parameters( parameters+parameter_idx, 1, (int)un_gate->get_parameter_num());
@@ -1448,7 +1449,6 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == ON_OPERATION) {
 
-            // get the inverse parameters of the RZ rotation
             ON* on_gate = static_cast<ON*>(gate);
 
             Matrix_real optimized_parameters( parameters+parameter_idx, 1, (int)on_gate->get_parameter_num());
@@ -1462,7 +1462,6 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == COMPOSITE_OPERATION) {
 
-            // get the inverse parameters of the RZ rotation
             Composite* com_gate = static_cast<Composite*>(gate);
 
             Matrix_real optimized_parameters( parameters+parameter_idx, 1, (int)com_gate->get_parameter_num());
@@ -1476,10 +1475,9 @@ std::vector<Gate*> Decomposition_Base::prepare_gates_to_export( std::vector<Gate
         }
         else if (gate->get_type() == ADAPTIVE_OPERATION) {
 
-            // definig the parameter of the rotational angle
+            // define the parameter of the rotational angle
             double Theta;
 
-            // get the inverse parameters of the RZ rotation
 
             Adaptive* ad_gate = static_cast<Adaptive*>(gate);
 

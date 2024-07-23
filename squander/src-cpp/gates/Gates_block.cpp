@@ -2353,6 +2353,7 @@ void Gates_block::set_qbit_num( int qbit_num_in ) {
         case GENERAL_OPERATION: case UN_OPERATION:
         case ON_OPERATION: case COMPOSITE_OPERATION:
         case ADAPTIVE_OPERATION: case RZ_P_OPERATION:
+        case CZ_NU_OPERATION:
             op->set_qbit_num( qbit_num_in );
             break;
         default:
@@ -2404,7 +2405,9 @@ int Gates_block::extract_gates( Gates_block* op_block ) {
         case SX_OPERATION: case BLOCK_OPERATION:
         case GENERAL_OPERATION: case UN_OPERATION:
         case ON_OPERATION: case COMPOSITE_OPERATION:
-        case ADAPTIVE_OPERATION: case RZ_P_OPERATION: {
+        case ADAPTIVE_OPERATION: case RZ_P_OPERATION:
+        case CZ_NU_OPERATION:
+        {
             Gate* op_cloned = op->clone();
             op_block->add_gate_to_end( op_cloned );
             break; }
